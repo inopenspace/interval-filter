@@ -20,39 +20,54 @@ public class IntervalFilter {
         }
     }
 
-    public void filter(IntervalModel model) {
-        if (model.getEnd() < getStart()) { //interval is less
+    public void filter(IntervalModel model) throws FilterException {
+        //время окончания интервала меньше времени начала нашего
+        if (model.getEnd() < getStart()) {
             return;
         }
-        if (model.getStart() >= getEnd()) { //interval is more
-            if(next!=null){
+        //начинается позже чем заканчивается наш
+        if (model.getStart() >= getEnd()) {
+            if (next != null) {
                 next.filter(model);
             }
+        }
+        //полностью включен
+        if (model.getStart() >= getStart() && model.getEnd() <= getEnd()) {
+            //просто вставляем
+            models.add(model.clone());
+            return;
+        }
+        //огибает с обеих сторон
+        if (model.getStart() <= getStart() && model.getEnd() >= getEnd()) {
+            if(next==null){
+                throw new FilterException("Перебор, интервал ушел за край"); //дальше идти некуда
+            }
+            // устанавливаем новые границы и отдаем дальше
+            IntervalModel newModel=model.clone();
+            newModel.setStart(start);
+            newModel.setEnd(end);
+            models.add(newModel);
+            next.filter(model);
+            return;
+        }
+        //включена дата окончания
+        if (model.getStart() <= getStart() && model.getEnd() <= getEnd() && model.getEnd() > getStart()) {
+            IntervalModel newModel=model.clone();
+            newModel.setEnd(end);
+            models.add(model);
             return;
         }
 
-        if (model.getStart() >= getStart() && model.getEnd() <= getEnd()) {//included
+        //включена дата начала
+        if (model.getStart() >= getStart() && model.getEnd() >= getEnd() && model.getStart() < getEnd()) {
+
+            IntervalModel newModel=model.clone();
+            newModel.setEnd(end);
             models.add(model);
-            return;
-        }
-        if (model.getStart() <= getStart() && model.getEnd() >= getEnd()) {//included
-            models.add(model);
-            if(next!=null){
+
+            if (next != null) {
                 next.filter(model);
             }
-            return;
-        }
-        if (model.getStart() <= getStart() && model.getEnd() <= getEnd() && model.getEnd() > getStart()) { //include left
-            models.add(model);
-            return;
-        }
-
-        if (model.getStart() >= getStart() && model.getEnd() >= getEnd() && model.getStart() < getEnd()) { //interval right
-            models.add(model);
-            if(next!=null){
-                next.filter(model);
-            }
-
         }
     }
 
@@ -85,4 +100,5 @@ public class IntervalFilter {
     public void setEnd(long end) {
         this.end = end;
     }
+
 }
