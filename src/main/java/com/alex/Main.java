@@ -8,10 +8,14 @@ public class Main {
     public static void main(String[] args) {
 
         long rage = 4;
+
         long start = 0;
         long end = 24;
         List<IntervalModel> intervals = new ArrayList<>();
-        intervals.add(new IntervalModel(0, 25));
+        intervals.add(new IntervalModel(0, 22));
+
+
+
         IntervalFilter intervalFilter = new IntervalFilter(start, end, rage);
 
         intervals.forEach(intervalFilter::filter);
@@ -20,3 +24,4 @@ public class Main {
 
     }
 }
+;

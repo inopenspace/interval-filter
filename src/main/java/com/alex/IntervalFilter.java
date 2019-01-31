@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 
 public class IntervalFilter {
 
@@ -11,6 +12,9 @@ public class IntervalFilter {
     private List<IntervalModel> models = new ArrayList<>();
     private long start;
     private long end;
+
+    private Predicate<IntervalModel> isOld = model -> model.getEnd() < getStart();
+    private Predicate<IntervalModel> outOfEnd = model -> model.getStart() >= getEnd();
 
     public IntervalFilter(long start, long end, long range) {
         this.start = start;
@@ -39,11 +43,11 @@ public class IntervalFilter {
         }
         //огибает с обеих сторон
         if (model.getStart() <= getStart() && model.getEnd() >= getEnd()) {
-            if(next==null){
+            if (next == null) {
                 throw new FilterException("Перебор, интервал ушел за край"); //дальше идти некуда
             }
             // устанавливаем новые границы и отдаем дальше
-            IntervalModel newModel=model.clone();
+            IntervalModel newModel = model.clone();
             newModel.setStart(start);
             newModel.setEnd(end);
             models.add(newModel);
@@ -52,18 +56,17 @@ public class IntervalFilter {
         }
         //включена дата окончания
         if (model.getStart() <= getStart() && model.getEnd() <= getEnd() && model.getEnd() > getStart()) {
-            IntervalModel newModel=model.clone();
-            newModel.setEnd(end);
-            models.add(model);
+            IntervalModel newModel = model.clone();
+            newModel.setStart(start);
+            models.add(newModel);
             return;
         }
 
         //включена дата начала
         if (model.getStart() >= getStart() && model.getEnd() >= getEnd() && model.getStart() < getEnd()) {
-
-            IntervalModel newModel=model.clone();
+            IntervalModel newModel = model.clone();
             newModel.setEnd(end);
-            models.add(model);
+            models.add(newModel);
 
             if (next != null) {
                 next.filter(model);
@@ -74,7 +77,6 @@ public class IntervalFilter {
     public Map<Integer, List<IntervalModel>> getRanges(Map<Integer, List<IntervalModel>> integerListMap) {
         if (integerListMap == null) {
             integerListMap = new HashMap<>();
-
         }
         integerListMap.put(integerListMap.size() + 1, models);
         if (next != null) {
