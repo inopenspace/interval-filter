@@ -1,0 +1,30 @@
+buildscript {
+    ext {
+
+        lombokVersion = '1.18.4'
+    }
+    repositories {
+        maven {
+            url 'https://plugins.gradle.org/m2/'
+        }
+        mavenLocal()
+        mavenCentral()
+    }    
+}
+
+plugins {
+    id 'java'
+}
+
+group 'com'
+version '1.0-SNAPSHOT'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+}
